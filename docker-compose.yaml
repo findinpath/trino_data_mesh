@@ -1,0 +1,60 @@
+version: "3.9"
+   
+services:
+  trino:
+    hostname: trino
+    image: 'trinodb/trino:358'
+    ports:
+      - '8080:8080'
+    volumes:
+      - ./trino/etc:/usr/lib/trino/etc:ro
+      - ./trino/catalog:/etc/trino/catalog
+    networks:
+      - trino-network
+
+  customersdb:
+    image: postgres:10
+    volumes:
+      - ./customersdb/init-customers.sql:/docker-entrypoint-initdb.d/init.sql
+      - ./customersdb/raw_customers.csv:/home/dump/raw_customers.csv
+    environment:
+      - POSTGRES_DB=postgres
+      - POSTGRES_USER=postgres
+      - POSTGRES_PASSWORD=postgres
+    ports:
+      - "15432:5432"
+    networks:
+      - trino-network
+
+  ordersdb:
+    image: postgres:10
+    volumes:
+      - ./ordersdb/init-orders.sql:/docker-entrypoint-initdb.d/init.sql
+      - ./ordersdb/raw_orders.csv:/home/dump/raw_orders.csv
+    environment:
+      - POSTGRES_DB=postgres
+      - POSTGRES_USER=postgres
+      - POSTGRES_PASSWORD=postgres
+    ports:
+      - "25432:5432"
+    networks:
+      - trino-network
+
+  paymentsdb:
+    image: postgres:10
+    volumes:
+      - ./paymentsdb/init-payments.sql:/docker-entrypoint-initdb.d/init.sql
+      - ./paymentsdb/raw_payments.csv:/home/dump/raw_payments.csv
+    environment:
+      - POSTGRES_DB=postgres
+      - POSTGRES_USER=postgres
+      - POSTGRES_PASSWORD=postgres
+    ports:
+      - "35432:5432"
+    networks:
+      - trino-network
+
+      
+networks:
+  trino-network:
+    driver: bridge            
